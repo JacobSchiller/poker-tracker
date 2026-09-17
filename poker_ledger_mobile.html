@@ -1,0 +1,1095 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#330077">
+<title>Poker Ledger</title>
+<style>
+:root{
+  --felt:#0173d3;
+  --felt-deep:#330077;
+  --paper:#f5f7fc;
+  --card:#ffffff;
+  --ink:#1f1842;
+  --muted:#6c6790;
+  --line:#d9ddf0;
+  --gold:#0173d3;
+  --gold-deep:#330077;
+  --gold-wash:#e8f3fe;
+  --brick:#330077;
+  --brick-wash:#eee5fb;
+  --green-wash:#edf3ff;
+  --up:#0173d3;
+  --down:#330077;
+  --shadow:0 2px 12px rgba(51,0,119,.10);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --felt:#0c4c8d;
+    --felt-deep:#22004f;
+    --paper:#120d24;
+    --card:#1a1430;
+    --ink:#f2f4ff;
+    --muted:#b5afd7;
+    --line:#332c57;
+    --gold:#48a2f2;
+    --gold-deep:#a786ff;
+    --gold-wash:#1a2740;
+    --brick:#8a5cff;
+    --brick-wash:#291d49;
+    --green-wash:#1a223d;
+    --up:#48a2f2;
+    --down:#a786ff;
+    --shadow:0 2px 14px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --felt:#0c4c8d;
+  --felt-deep:#22004f;
+  --paper:#120d24;
+  --card:#1a1430;
+  --ink:#f2f4ff;
+  --muted:#b5afd7;
+  --line:#332c57;
+  --gold:#48a2f2;
+  --gold-deep:#a786ff;
+  --gold-wash:#1a2740;
+  --brick:#8a5cff;
+  --brick-wash:#291d49;
+  --green-wash:#1a223d;
+  --up:#48a2f2;
+  --down:#a786ff;
+  --shadow:0 2px 14px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  color:var(--ink);-webkit-font-smoothing:antialiased;
+}
+.serif{font-family:Georgia,'Times New Roman',serif}
+.num{font-variant-numeric:tabular-nums}
+a{color:inherit}
+
+header{
+  background:linear-gradient(180deg,var(--felt) 0%,var(--felt-deep) 100%);
+  color:#f6f7ff;padding:24px 24px 0;position:sticky;top:0;z-index:5;
+  border-bottom:3px solid var(--gold);
+}
+.wrap{max-width:1120px;margin:auto}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.brand .mark{font-size:22px;color:var(--gold);line-height:1}
+h1{margin:0;font-size:26px;font-weight:600;font-family:Georgia,'Times New Roman',serif}
+header .tagline{margin:5px 0 18px;color:#d6c9ff;font-size:13.5px;font-style:italic;font-family:Georgia,'Times New Roman',serif}
+nav{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.tabs{display:flex;gap:2px;flex-wrap:wrap}
+button{border:0;cursor:pointer;font-family:inherit;font-weight:600;font-size:14px;color:inherit}
+.tab{background:transparent;color:#d6c9ff;padding:10px 14px;border-radius:8px 8px 0 0;border-bottom:2px solid transparent}
+.tab:hover{color:#f6f7ff}
+.tab.active{color:#f6f7ff;border-bottom:2px solid var(--gold);background:rgba(244,239,226,.06)}
+.primary{background:var(--gold);color:#ffffff;padding:10px 16px;border-radius:8px;box-shadow:0 1px 0 rgba(0,0,0,.15);white-space:nowrap}
+.primary:hover{background:#005fb0}
+.primary.live{background:var(--brick);color:#fff}
+.primary.live:hover{background:#4a1096}
+.ghost{background:transparent;color:#f6f7ff;border:1px solid rgba(244,239,226,.35);padding:9px 14px;border-radius:8px;white-space:nowrap}
+.ghost:hover{border-color:var(--gold)}
+.ghost.onpaper{color:var(--ink);border-color:var(--line)}
+.ghost.onpaper:hover{border-color:var(--gold-deep);color:var(--gold-deep)}
+.danger{background:transparent;color:var(--brick);border:1px solid var(--brick-wash);padding:8px 13px;border-radius:8px}
+.danger:hover{background:var(--brick-wash)}
+.nav-cta{display:flex;gap:8px;padding-bottom:12px;flex-wrap:wrap}
+
+main{padding:26px 24px 60px}
+main>div.hidden{display:none}
+section{margin-top:22px}
+h2{font-family:Georgia,'Times New Roman',serif;font-weight:600;font-size:20px;margin:0}
+h3{font-family:Georgia,'Times New Roman',serif;font-weight:600;font-size:16px;margin:22px 0 12px}
+.muted{color:var(--muted)}
+.subtle{color:var(--muted);font-size:13.5px;margin-top:4px}
+.row{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--shadow)}
+
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.stat small{color:var(--muted);display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em}
+.stat strong{font-size:24px;display:block;margin-top:7px;font-family:Georgia,'Times New Roman',serif;font-weight:600}
+
+.live-banner{
+  margin-top:22px;border-radius:14px;padding:18px 20px;color:#f6f7ff;
+  background:linear-gradient(135deg,var(--felt) 0%,var(--felt-deep) 100%);
+  border:1px solid var(--gold);box-shadow:var(--shadow);
+  display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+}
+.live-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#8a5cff;margin-right:8px;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.live-banner .lb-title{font-family:Georgia,'Times New Roman',serif;font-size:17px;font-weight:600}
+.live-banner .lb-meta{color:#d6c9ff;font-size:13px;margin-top:4px}
+.live-banner .lb-timer{font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:600;color:#e8f3fe}
+.live-banner .lb-actions{display:flex;gap:8px}
+.start-live-cta{
+  margin-top:22px;border:1px dashed var(--line);border-radius:14px;padding:20px;text-align:center;
+}
+.start-live-cta p{margin:0 0 12px;color:var(--muted);font-style:italic;font-family:Georgia,'Times New Roman',serif}
+
+.ledger-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:13px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.ledger-row:last-child{border-bottom:0}
+.ledger-row:hover .ledger-name{color:var(--gold-deep)}
+.ledger-main{display:flex;align-items:flex-start;gap:12px;min-width:0}
+.ledger-bar{width:4px;align-self:stretch;border-radius:3px;flex-shrink:0}
+.ledger-bar.up{background:var(--gold)}
+.ledger-bar.down{background:var(--brick)}
+.ledger-bar.live{background:#8a5cff}
+.ledger-name{font-weight:600}
+.tagset{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.tag{font-size:11.5px;color:var(--muted);background:var(--green-wash);border-radius:6px;padding:2px 8px}
+.tag.live-tag{color:#330077;background:var(--brick-wash);font-weight:600}
+.ledger-figure{font-family:Georgia,'Times New Roman',serif;font-weight:600;font-size:18px;white-space:nowrap}
+.list-empty{color:var(--muted);font-style:italic;padding:12px 4px;font-family:Georgia,'Times New Roman',serif}
+
+.up{color:var(--up)}
+.down{color:var(--down)}
+
+canvas{width:100%;height:280px;display:block}
+.chart-card{padding-bottom:14px}
+.chart-wrap{position:relative}
+.chart-tooltip{
+  position:absolute;pointer-events:none;background:var(--felt);color:#f6f7ff;padding:7px 11px;border-radius:8px;
+  box-shadow:var(--shadow);transform:translate(-50%,-115%);white-space:nowrap;opacity:0;transition:opacity .08s ease;
+  z-index:5;border:1px solid var(--gold);
+}
+.chart-tooltip.show{opacity:1}
+.chart-tooltip .tt-label{font-family:Georgia,'Times New Roman',serif;font-style:italic;color:#d6c9ff;font-size:11.5px;display:block}
+.chart-tooltip .tt-value{font-family:Georgia,'Times New Roman',serif;font-weight:600;font-size:14.5px}
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:4px}
+.filter-bar .fitem{min-width:150px;flex:1}
+
+table{width:100%;border-collapse:collapse;margin-top:4px}
+th,td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:left}
+th{font-size:12px;color:var(--muted);font-weight:600}
+tr:last-child td{border-bottom:0}
+
+label{font-size:12.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px}
+input,select,textarea{
+  width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font:inherit;
+  background:var(--card);color:var(--ink);
+}
+input:focus,select:focus,textarea:focus,button:focus-visible{
+  outline:2px solid var(--gold-deep);outline-offset:1px;border-color:var(--gold-deep);
+}
+.formgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:end}
+.formgrid .wide{grid-column:span 2}
+.entry-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:9px 0;border-bottom:1px solid var(--line)}
+.entry-row:last-child{border-bottom:0}
+.net-banner{margin-top:14px;background:var(--felt);color:#f6f7ff;border-radius:12px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.net-banner strong.figure{font-family:Georgia,'Times New Roman',serif;font-size:22px}
+.net-banner .nb-sub{color:#d6c9ff;font-size:12.5px}
+.actions{display:flex;gap:8px}
+.empty-hint{color:var(--muted);font-style:italic;font-family:Georgia,'Times New Roman',serif;padding:14px 4px}
+.timer-big{font-family:Georgia,'Times New Roman',serif;font-size:38px;font-weight:600;text-align:center;margin:6px 0 2px}
+.cashout-box{margin-top:16px;border:1px solid var(--gold);border-radius:12px;padding:16px;background:var(--gold-wash)}
+
+@media(max-width:900px){
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .formgrid{grid-template-columns:1fr 1fr}
+  .formgrid .wide{grid-column:span 2}
+}
+@media(max-width:560px){
+  header{padding:18px 16px 0}
+  main{padding:16px 16px 48px}
+  h1{font-size:21px}
+  .stats{grid-template-columns:1fr 1fr;gap:9px}
+  .stat strong{font-size:19px}
+  .formgrid{grid-template-columns:1fr}
+  .formgrid .wide{grid-column:span 1}
+  .card{padding:15px}
+  .live-banner{flex-direction:column;align-items:flex-start}
+}
+
+@media(max-width:560px){
+  body{padding-bottom:env(safe-area-inset-bottom)}
+  header{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));padding-top:max(18px,env(safe-area-inset-top))}
+  main{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}
+  button,.tab,.primary,.ghost,.danger{min-height:44px;touch-action:manipulation}
+  input,select,textarea{font-size:16px;min-height:44px}
+  .tabs{width:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+  .tab{padding:10px 4px;font-size:12px;text-align:center}
+  .nav-cta{width:100%;display:grid;grid-template-columns:1fr;gap:8px}
+  .nav-cta button{width:100%}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat{padding:12px}
+  .row{align-items:stretch}
+  .row>.actions{width:100%}
+  .actions{width:100%;display:grid;grid-template-columns:1fr;gap:8px}
+  .actions button{width:100%}
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  canvas{height:240px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}.live-dot{animation:none}}
+
+button,input,select,textarea{-webkit-tap-highlight-color:rgba(1,115,211,.15)}
+</style>
+</head>
+<body>
+<div id="browserNotice" style="display:none;position:sticky;top:0;z-index:20;padding:10px 14px;background:#330077;color:white;font-size:13px;text-align:center">For full saving support, open this HTML in Safari or Chrome rather than the Files preview.</div>
+<header>
+<div class="wrap">
+  <div class="brand"><span class="mark">&#9824;</span><h1>Poker Ledger</h1></div>
+  <p class="tagline">Every session, buy-in, and cash-out — tracked by venue and stakes</p>
+  <nav>
+    <div class="tabs">
+      <button type="button" class="tab active" data-tab="dashboard">Dashboard</button>
+      <button type="button" class="tab" data-tab="sessions">Sessions</button>
+      <button type="button" class="tab" data-tab="venues">Venues</button>
+      <button type="button" class="tab" data-tab="graphs">Graphs</button>
+    </div>
+  </nav>
+  <div class="nav-cta">
+    <button type="button" class="primary" id="liveNavBtn" data-action="live-nav">Go live</button>
+    <button type="button" class="ghost" data-action="completed-new-open">+ Add completed session</button>
+  </div>
+</div>
+</header>
+<main class="wrap">
+
+<div id="dashboard">
+  <section class="stats">
+    <div class="stat"><small>Total profit</small><strong id="statProfit" class="num">$0</strong></div>
+    <div class="stat"><small>$ / hour</small><strong id="statPerHour" class="num">$0</strong></div>
+    <div class="stat"><small>BB / hour</small><strong id="statBB" class="num">&mdash;</strong></div>
+    <div class="stat"><small>Hours played</small><strong id="statHours" class="num">0h</strong></div>
+    <div class="stat"><small>Profitability ratio</small><strong id="statRatio" class="num">0%</strong></div>
+  </section>
+
+  <div id="liveArea"></div>
+
+  <section class="card">
+    <div class="row">
+      <div><h2>Recent sessions</h2><div class="subtle">Tap a session to view or edit it.</div></div>
+      <button type="button" class="ghost onpaper" data-tab="sessions">View all</button>
+    </div>
+    <div id="recent" style="margin-top:6px"></div>
+  </section>
+
+  <section class="card chart-card">
+    <h2>Cumulative profit</h2>
+    <div class="chart-wrap">
+      <canvas id="dashChart"></canvas>
+      <div class="chart-tooltip" id="dashTooltip"></div>
+    </div>
+  </section>
+</div>
+
+<div id="sessions" class="hidden">
+  <section class="card">
+    <div class="row">
+      <div><h2>Sessions</h2><div class="subtle">Every session you've logged, newest first.</div></div>
+      <div class="actions">
+        <button type="button" class="ghost onpaper" data-action="completed-new-open">+ Add completed</button>
+      </div>
+    </div>
+    <div id="sessionList" style="margin-top:6px"></div>
+  </section>
+</div>
+
+<div id="venues" class="hidden">
+  <section class="card">
+    <div><h2>Venues</h2><div class="subtle">Lifetime results at each place you've played.</div></div>
+    <div id="venueList" style="margin-top:10px"></div>
+  </section>
+</div>
+
+<div id="graphs" class="hidden">
+  <section class="card chart-card">
+    <div class="row">
+      <h2>Graphs</h2>
+    </div>
+    <div class="filter-bar" style="margin-top:14px">
+      <div class="fitem"><label for="gType">Metric</label>
+        <select id="gType">
+          <option value="cumulative">Cumulative profit</option>
+          <option value="session">Profit by session</option>
+          <option value="bb">BB result by session</option>
+          <option value="hourly">$/hour by session</option>
+        </select>
+      </div>
+      <div class="fitem"><label for="gVenue">Venue</label><select id="gVenue"><option value="">All venues</option></select></div>
+      <div class="fitem"><label for="gStakes">Stakes</label><select id="gStakes"><option value="">All stakes</option></select></div>
+    </div>
+    <div class="chart-wrap" style="margin-top:10px">
+      <canvas id="mainChart"></canvas>
+      <div class="chart-tooltip" id="mainTooltip"></div>
+    </div>
+  </section>
+</div>
+
+<div id="startLive" class="hidden">
+  <section class="card">
+    <div class="row">
+      <div><h2>Start a live session</h2><div class="subtle">Log the basics now — you can top off or cash out any time.</div></div>
+      <div class="actions">
+        <button type="button" class="ghost onpaper" data-action="close-editor">Cancel</button>
+        <button type="button" class="primary" data-action="start-live">Start session</button>
+      </div>
+    </div>
+    <div class="formgrid" style="margin-top:16px">
+      <div><label for="slVenue">Venue</label><input id="slVenue" list="venueOptions" placeholder="e.g. Home game, Casino X"></div>
+      <div><label for="slStakes">Stakes</label><input id="slStakes" list="stakesOptions" placeholder="e.g. 1/2"></div>
+      <div><label for="slSeats">Seats per table</label><input id="slSeats" type="number" min="2" step="1" placeholder="9"></div>
+      <div><label for="slBuyin">Initial buy-in</label><input id="slBuyin" type="number" min="0" step="1" placeholder="300"></div>
+    </div>
+    <div class="formgrid" style="margin-top:12px">
+      <div class="wide"><label for="slStart">Time started</label><input id="slStart" type="datetime-local"></div>
+    </div>
+  </section>
+</div>
+
+<div id="manageLive" class="hidden">
+  <section class="card">
+    <div class="row">
+      <div><h2 id="mlTitle">Live session</h2><div class="subtle" id="mlMeta"></div></div>
+      <div class="actions">
+        <button type="button" class="ghost onpaper" data-action="close-editor">Back</button>
+        <button type="button" class="danger" data-action="discard-session">Discard session</button>
+      </div>
+    </div>
+    <div class="timer-big num" id="mlTimer">0:00:00</div>
+    <div class="subtle" style="text-align:center" id="mlSub"></div>
+
+    <div class="formgrid" style="margin-top:20px">
+      <div><label for="mlVenue">Venue</label><input id="mlVenue" list="venueOptions"></div>
+      <div><label for="mlStakes">Stakes</label><input id="mlStakes" list="stakesOptions"></div>
+      <div><label for="mlSeats">Seats per table</label><input id="mlSeats" type="number" min="2" step="1"></div>
+      <div><label for="mlStart">Time started</label><input id="mlStart" type="datetime-local"></div>
+    </div>
+
+    <h3>Buy-ins</h3>
+    <div id="mlBuyins"></div>
+    <div class="net-banner">
+      <span>Total buy-in</span>
+      <strong id="mlTotalBuyin" class="figure num">$0</strong>
+    </div>
+    <div class="formgrid" style="margin-top:14px">
+      <div><label for="mlTopAmt">Top off amount</label><input id="mlTopAmt" type="number" min="0" step="1" placeholder="100"></div>
+      <div class="wide"><label for="mlTopNote">Note</label><input id="mlTopNote" placeholder="Optional"></div>
+      <div><button type="button" class="ghost onpaper" style="width:100%" data-action="add-topoff">Add top off</button></div>
+    </div>
+
+    <div class="cashout-box">
+      <h3 style="margin-top:0">Cash out</h3>
+      <div class="formgrid">
+        <div><label for="mlCashAmt">Cash-out amount</label><input id="mlCashAmt" type="number" min="0" step="1" placeholder="0"></div>
+        <div><label for="mlCashTime">Time ended</label><input id="mlCashTime" type="datetime-local"></div>
+        <div class="wide"><button type="button" class="primary" style="width:100%" data-action="confirm-cashout">Cash out &amp; finish session</button></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="completedForm" class="hidden">
+  <section class="card">
+    <div class="row">
+      <div><h2 id="cfTitle">Add completed session</h2><div class="subtle">Log a session that's already finished.</div></div>
+      <div class="actions">
+        <button type="button" class="ghost onpaper" data-action="close-editor">Cancel</button>
+        <button type="button" class="danger hidden" id="cfDelete" data-action="delete-current">Delete</button>
+        <button type="button" class="primary" data-action="save-completed">Save session</button>
+      </div>
+    </div>
+    <div class="formgrid" style="margin-top:16px">
+      <div><label for="cfVenue">Venue</label><input id="cfVenue" list="venueOptions"></div>
+      <div><label for="cfStakes">Stakes</label><input id="cfStakes" list="stakesOptions" placeholder="e.g. 1/2"></div>
+      <div><label for="cfSeats">Seats per table</label><input id="cfSeats" type="number" min="2" step="1" placeholder="9"></div>
+      <div><label for="cfCash">Cash-out</label><input id="cfCash" type="number" min="0" step="1" placeholder="0"></div>
+    </div>
+    <div class="formgrid" style="margin-top:12px">
+      <div class="wide"><label for="cfStart">Time started</label><input id="cfStart" type="datetime-local"></div>
+      <div class="wide"><label for="cfEnd">Time ended</label><input id="cfEnd" type="datetime-local"></div>
+    </div>
+
+    <h3>Buy-ins</h3>
+    <div id="cfBuyins"></div>
+    <div class="formgrid" style="margin-top:10px">
+      <div><label for="cfBuyAmt">Amount</label><input id="cfBuyAmt" type="number" min="0" step="1" placeholder="300"></div>
+      <div class="wide"><label for="cfBuyNote">Note</label><input id="cfBuyNote" placeholder="e.g. Initial buy-in, top off"></div>
+      <div><button type="button" class="ghost onpaper" style="width:100%" data-action="add-buyin-completed">Add entry</button></div>
+    </div>
+
+    <div class="net-banner">
+      <span>Session outcome</span>
+      <strong id="cfNet" class="figure num">$0</strong>
+    </div>
+
+    <h3>Notes</h3>
+    <input id="cfNotes" placeholder="Optional notes about this session">
+  </section>
+</div>
+
+<datalist id="venueOptions"></datalist>
+<datalist id="stakesOptions"></datalist>
+
+</main>
+<script>
+const KEY='pokerLedgerV1';
+let db={sessions:[]};
+let editing=null;      // clone used by the completed-session form
+let chartHover={};
+let liveTickHandle=null;
+let lastTab='dashboard';
+
+let storageOK=true;
+try{
+  const probe='__pokerLedgerProbe__';
+  localStorage.setItem(probe,'1');
+  localStorage.removeItem(probe);
+  const saved=localStorage.getItem(KEY);
+  if(saved){
+    const parsed=JSON.parse(saved);
+    if(parsed && Array.isArray(parsed.sessions)) db=parsed;
+  }
+}catch(e){
+  storageOK=false;
+  console.warn('Persistent storage is unavailable in this viewer. Open the HTML in Safari/Chrome for saving.',e);
+}
+
+function persist(){
+  if(!storageOK) return false;
+  try{ localStorage.setItem(KEY,JSON.stringify(db)); return true; }
+  catch(e){ storageOK=false; console.warn('Local storage unavailable. Changes will only last while this page is open.',e); return false; }
+}
+
+/* ---------- helpers ---------- */
+function uid(){ return 's_'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function money(n){ n=Number(n)||0; return (n<0?'-$':'$')+Math.abs(Math.round(n)).toLocaleString(); }
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function pad2(n){ return String(n).padStart(2,'0'); }
+function toLocalInput(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+'T'+pad2(d.getHours())+':'+pad2(d.getMinutes()); }
+function fromLocalInput(str){ return str ? new Date(str).toISOString() : new Date().toISOString(); }
+function fmtElapsed(ms){
+  let s=Math.max(0,Math.floor(ms/1000));
+  const h=Math.floor(s/3600); s-=h*3600;
+  const m=Math.floor(s/60); s-=m*60;
+  return h+':'+pad2(m)+':'+pad2(s);
+}
+function fmtHours(h){ return (Math.round(h*10)/10)+'h'; }
+function fmtBB(n){ return (n>=0?'+':'')+n.toFixed(2); }
+function fmtDate(iso){
+  const d=new Date(iso);
+  return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+}
+
+function totalBuyIn(s){ return (s.buyins||[]).reduce((a,b)=>a+(Number(b.amount)||0),0); }
+function outcome(s){ return s.status==='completed' ? (Number(s.cashout)||0)-totalBuyIn(s) : null; }
+function durationHours(s){
+  const start=new Date(s.startTime);
+  const end=s.endTime ? new Date(s.endTime) : new Date();
+  return Math.max(0,(end-start)/3600000);
+}
+function bbSize(stakes){
+  if(!stakes) return null;
+  const nums=(String(stakes).match(/[\d.]+/g)||[]).map(Number).filter(n=>!isNaN(n)&&n>0);
+  if(!nums.length) return null;
+  return nums[nums.length-1];
+}
+function profitBB(s){
+  const o=outcome(s), bb=bbSize(s.stakes);
+  return (o!=null && bb) ? o/bb : null;
+}
+function activeSession(){ return db.sessions.find(s=>s.status==='active')||null; }
+function distinctVenues(){ return [...new Set(db.sessions.map(s=>s.venue).filter(Boolean))].sort(); }
+function distinctStakes(){ return [...new Set(db.sessions.map(s=>s.stakes).filter(Boolean))].sort(); }
+
+function computeStats(sessions){
+  const completed=sessions.filter(s=>s.status==='completed');
+  const totalProfit=completed.reduce((a,s)=>a+outcome(s),0);
+  const totalHours=completed.reduce((a,s)=>a+durationHours(s),0);
+  const perHour=totalHours>0?totalProfit/totalHours:0;
+  let bbNum=0,bbHrs=0;
+  completed.forEach(s=>{ const bb=bbSize(s.stakes); if(bb){ bbNum+=outcome(s)/bb; bbHrs+=durationHours(s); } });
+  const bbPerHour=bbHrs>0?bbNum/bbHrs:null;
+  const wins=completed.filter(s=>outcome(s)>=0).length;
+  const ratio=completed.length?Math.round(wins/completed.length*100):0;
+  return {totalProfit,totalHours,perHour,bbPerHour,ratio,count:completed.length};
+}
+
+function venueStats(){
+  const map={};
+  db.sessions.forEach(s=>{
+    if(!s.venue) return;
+    const v=map[s.venue]||{venue:s.venue,sessions:0,hours:0,profit:0,completed:0};
+    v.sessions++;
+    if(s.status==='completed'){ v.hours+=durationHours(s); v.profit+=outcome(s); v.completed++; }
+    map[s.venue]=v;
+  });
+  return Object.values(map).map(v=>({...v,perHour:v.hours>0?v.profit/v.hours:0})).sort((a,b)=>b.profit-a.profit);
+}
+
+function refreshDatalists(){
+  document.getElementById('venueOptions').innerHTML=distinctVenues().map(v=>`<option value="${esc(v)}">`).join('');
+  document.getElementById('stakesOptions').innerHTML=distinctStakes().map(v=>`<option value="${esc(v)}">`).join('');
+}
+
+/* ---------- tabs ---------- */
+function tabButton(id){ return document.querySelector(`.tab[data-tab="${id}"]`); }
+function showTab(id,btn){
+  document.querySelectorAll('main>div').forEach(x=>x.classList.add('hidden'));
+  const panel=document.getElementById(id);
+  if(!panel) return;
+  panel.classList.remove('hidden');
+  const isMainTab=['dashboard','sessions','venues','graphs'].includes(id);
+  if(isMainTab) lastTab=id;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  const activeBtn=btn && btn.classList.contains('tab') ? btn : (isMainTab?tabButton(id):null);
+  if(activeBtn) activeBtn.classList.add('active');
+  stopLiveTick();
+  if(id==='dashboard'){ renderDashboard(); startLiveTick('dashboard'); }
+  if(id==='sessions') renderSessions();
+  if(id==='venues') renderVenues();
+  if(id==='graphs') renderGraphs();
+  if(id==='manageLive') startLiveTick('manageLive');
+}
+function closeEditor(){ showTab(lastTab); }
+
+/* ---------- dashboard ---------- */
+function metaTags(s){
+  const bits=[];
+  if(s.stakes) bits.push(esc(s.stakes));
+  if(s.seats) bits.push(s.seats+'-max');
+  if(s.venue) bits.push(esc(s.venue));
+  return `<div class="tagset">${bits.map(b=>`<span class="tag">${b}</span>`).join('')}${s.status==='active'?'<span class="tag live-tag">&#9679; Live</span>':''}</div>`;
+}
+
+function renderDashboard(){
+  const stats=computeStats(db.sessions);
+  const profitEl=document.getElementById('statProfit');
+  profitEl.textContent=money(stats.totalProfit);
+  profitEl.className='num '+(stats.totalProfit>=0?'up':'down');
+
+  const perHourEl=document.getElementById('statPerHour');
+  perHourEl.textContent=money(stats.perHour)+'/hr';
+  perHourEl.className='num '+(stats.perHour>=0?'up':'down');
+
+  const bbEl=document.getElementById('statBB');
+  if(stats.bbPerHour==null){ bbEl.textContent='\u2014'; bbEl.className='num muted'; }
+  else{ bbEl.textContent=fmtBB(stats.bbPerHour)+' bb/hr'; bbEl.className='num '+(stats.bbPerHour>=0?'up':'down'); }
+
+  document.getElementById('statHours').textContent=fmtHours(stats.totalHours);
+
+  const ratioEl=document.getElementById('statRatio');
+  ratioEl.textContent=stats.ratio+'%';
+  ratioEl.className='num '+(stats.ratio>=50?'up':'down');
+
+  renderLiveArea();
+
+  const recent=db.sessions.slice().sort((a,b)=>new Date(b.startTime)-new Date(a.startTime)).slice(0,6);
+  document.getElementById('recent').innerHTML=recent.map(s=>{
+    const o=outcome(s);
+    const bar=s.status==='active'?'live':(o>=0?'up':'down');
+    const figure=s.status==='active'?'<span class="tag live-tag">&#9679; Live</span>':`<span class="ledger-figure num ${o>=0?'up':'down'}">${money(o)}</span>`;
+    return `<div class="ledger-row" data-open-id="${esc(s.id)}">
+      <div class="ledger-main">
+        <div class="ledger-bar ${bar}"></div>
+        <div><div class="ledger-name">${esc(s.venue||'Session')} &middot; ${fmtDate(s.startTime)}</div>${metaTags(s)}</div>
+      </div>
+      ${figure}
+    </div>`;
+  }).join('') || '<p class="list-empty">No sessions yet. Start a live one or log a completed session.</p>';
+
+  drawCanvas('dashChart','cumulative',db.sessions.filter(s=>s.status==='completed'));
+}
+
+function renderLiveArea(){
+  const el=document.getElementById('liveArea');
+  const live=activeSession();
+  const liveBtn=document.getElementById('liveNavBtn');
+  if(live){
+    liveBtn.textContent='\u25cf Live session';
+    liveBtn.classList.add('live');
+    el.innerHTML=`<div class="live-banner" data-open-id="${esc(live.id)}">
+      <div>
+        <div class="lb-title"><span class="live-dot"></span>${esc(live.venue||'Live session')}</div>
+        <div class="lb-meta">${esc(live.stakes||'')}${live.seats?' &middot; '+live.seats+'-max':''} &middot; ${money(totalBuyIn(live))} in</div>
+      </div>
+      <div class="lb-timer num" id="liveBannerTimer">0:00:00</div>
+      <div class="lb-actions">
+        <button type="button" class="ghost" data-action="open-manage-live">Manage</button>
+      </div>
+    </div>`;
+  }else{
+    liveBtn.textContent='Go live';
+    liveBtn.classList.remove('live');
+    el.innerHTML=`<div class="start-live-cta">
+      <p>No session running right now.</p>
+      <button type="button" class="primary" data-action="live-nav">Start a live session</button>
+    </div>`;
+  }
+}
+
+function startLiveTick(context){
+  stopLiveTick();
+  const live=activeSession();
+  if(!live) return;
+  const tick=()=>{
+    const ms=new Date()-new Date(live.startTime);
+    if(context==='dashboard'){
+      const t=document.getElementById('liveBannerTimer');
+      if(t) t.textContent=fmtElapsed(ms);
+    }else if(context==='manageLive'){
+      const t=document.getElementById('mlTimer');
+      if(t) t.textContent=fmtElapsed(ms);
+    }
+  };
+  tick();
+  liveTickHandle=setInterval(tick,1000);
+}
+function stopLiveTick(){ if(liveTickHandle){ clearInterval(liveTickHandle); liveTickHandle=null; } }
+
+/* ---------- sessions list ---------- */
+function renderSessions(){
+  const list=db.sessions.slice().sort((a,b)=>new Date(b.startTime)-new Date(a.startTime));
+  document.getElementById('sessionList').innerHTML=list.map(s=>{
+    const o=outcome(s);
+    const bar=s.status==='active'?'live':(o>=0?'up':'down');
+    const figure=s.status==='active'?'<span class="tag live-tag">&#9679; Live</span>':`<span class="ledger-figure num ${o>=0?'up':'down'}">${money(o)}</span>`;
+    return `<div class="ledger-row" data-open-id="${esc(s.id)}">
+      <div class="ledger-main">
+        <div class="ledger-bar ${bar}"></div>
+        <div><div class="ledger-name">${esc(s.venue||'Session')} &middot; ${fmtDate(s.startTime)}</div>${metaTags(s)}</div>
+      </div>
+      ${figure}
+    </div>`;
+  }).join('') || '<p class="list-empty">No sessions recorded yet.</p>';
+}
+
+function openSession(id){
+  const s=db.sessions.find(x=>x.id===id);
+  if(!s) return;
+  if(s.status==='active') openManageLive();
+  else openCompletedEdit(s.id);
+}
+
+/* ---------- venues ---------- */
+function renderVenues(){
+  const vs=venueStats();
+  document.getElementById('venueList').innerHTML = vs.length ? `
+    <table>
+      <thead><tr><th>Venue</th><th>Sessions</th><th>Hours</th><th>Profit</th><th>$/hour</th></tr></thead>
+      <tbody>
+        ${vs.map(v=>`<tr>
+          <td>${esc(v.venue)}</td>
+          <td>${v.sessions}</td>
+          <td>${fmtHours(v.hours)}</td>
+          <td class="num ${v.profit>=0?'up':'down'}">${money(v.profit)}</td>
+          <td class="num ${v.perHour>=0?'up':'down'}">${money(v.perHour)}/hr</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>` : '<p class="list-empty">No venues logged yet.</p>';
+}
+
+/* ---------- graphs ---------- */
+function populateFilterSelect(id,values){
+  const sel=document.getElementById(id);
+  const current=sel.value;
+  sel.innerHTML='<option value="">'+(id==='gVenue'?'All venues':'All stakes')+'</option>'+
+    values.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+  if(values.includes(current)) sel.value=current;
+}
+
+function filteredCompletedSessions(){
+  const venue=document.getElementById('gVenue').value;
+  const stakes=document.getElementById('gStakes').value;
+  return db.sessions.filter(s=>s.status==='completed'
+    && (!venue || s.venue===venue)
+    && (!stakes || s.stakes===stakes)
+  ).sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
+}
+
+function renderGraphs(){
+  populateFilterSelect('gVenue',distinctVenues());
+  populateFilterSelect('gStakes',distinctStakes());
+  drawGraph();
+}
+
+function drawGraph(){
+  const type=document.getElementById('gType').value;
+  const sessions=filteredCompletedSessions();
+  drawCanvas('mainChart',type,sessions);
+}
+
+function seriesFor(type,sessions){
+  if(type==='session') return sessions.map((s,i)=>({x:fmtDate(s.startTime),y:outcome(s)}));
+  if(type==='bb') return sessions.filter(s=>bbSize(s.stakes)).map(s=>({x:fmtDate(s.startTime),y:profitBB(s)}));
+  if(type==='hourly') return sessions.filter(s=>durationHours(s)>0).map(s=>({x:fmtDate(s.startTime),y:outcome(s)/durationHours(s)}));
+  let cum=0;
+  return sessions.map(s=>({x:fmtDate(s.startTime),y:cum+=outcome(s)}));
+}
+
+function drawCanvas(id,type,sessions){
+  const c=document.getElementById(id);
+  if(!c || c.closest('.hidden')) return;
+  const ctx=c.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  const w=c.clientWidth, h=c.clientHeight;
+  if(!w||!h) return;
+  c.width=Math.round(w*dpr); c.height=Math.round(h*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+  const pts=seriesFor(type,sessions);
+  const inkMuted=getComputedStyle(document.body).getPropertyValue('--muted').trim()||'#7a715e';
+  const lineCol=getComputedStyle(document.body).getPropertyValue('--line').trim()||'#e3dac4';
+  const feltCol=getComputedStyle(document.body).getPropertyValue('--felt').trim()||'#12332b';
+  if(!pts.length){
+    ctx.fillStyle=inkMuted;
+    ctx.font='italic 14px Fraunces, Georgia, serif';
+    ctx.fillText('No data yet for this filter.',16,32);
+    chartHover[id]={points:[]};
+    return;
+  }
+  const pad={l:60,r:16,t:20,b:44};
+  const iw=w-pad.l-pad.r, ih=h-pad.t-pad.b;
+  const vals=pts.map(p=>p.y);
+  let min=Math.min(0,...vals), max=Math.max(0,...vals);
+  if(min===max){min-=1;max+=1}
+  const pcAdd=(max-min)*0.08;
+  max+=pcAdd; if(min<0) min-=pcAdd;
+  const x=i=>pad.l+(pts.length===1?iw/2:iw*i/(pts.length-1));
+  const y=v=>pad.t+(max-v)/(max-min)*ih;
+
+  ctx.strokeStyle=lineCol; ctx.fillStyle=inkMuted; ctx.font='11px Inter, sans-serif';
+  for(let j=0;j<=4;j++){
+    const v=min+(max-min)*j/4, yy=y(v);
+    ctx.beginPath(); ctx.setLineDash([3,4]); ctx.moveTo(pad.l,yy); ctx.lineTo(w-pad.r,yy); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillText(type==='bb'?fmtBB(v):money(v),4,yy+4);
+  }
+  if(min<0 && max>0){
+    ctx.strokeStyle=lineCol; ctx.beginPath(); ctx.moveTo(pad.l,y(0)); ctx.lineTo(w-pad.r,y(0)); ctx.stroke();
+  }
+  const grad=ctx.createLinearGradient(0,pad.t,0,pad.t+ih);
+  grad.addColorStop(0,'rgba(1,115,211,.22)'); grad.addColorStop(1,'rgba(1,115,211,0)');
+  ctx.beginPath();
+  pts.forEach((p,i)=>{const xx=x(i),yy=y(p.y); i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy)});
+  ctx.lineTo(x(pts.length-1),y(Math.max(0,min))); ctx.lineTo(x(0),y(Math.max(0,min))); ctx.closePath();
+  ctx.fillStyle=grad; ctx.fill();
+
+  ctx.strokeStyle=feltCol; ctx.lineWidth=2.25; ctx.beginPath();
+  pts.forEach((p,i)=>{const xx=x(i),yy=y(p.y); i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy)});
+  ctx.stroke();
+
+  pts.forEach((p,i)=>{
+    const xx=x(i),yy=y(p.y);
+    ctx.fillStyle=p.y>=0?'#a97f24':'#330077';
+    ctx.beginPath(); ctx.arc(xx,yy,3.5,0,Math.PI*2); ctx.fill();
+    if(pts.length<=24){
+      ctx.fillStyle=inkMuted; ctx.save(); ctx.translate(xx,h-16); ctx.rotate(-Math.PI/6); ctx.textAlign='right';
+      ctx.fillText(p.x,0,0); ctx.restore();
+    }
+  });
+  chartHover[id]={pad,w,h,type,points:pts.map((p,i)=>({x:x(i),y:y(p.y),label:p.x,value:p.y}))};
+}
+
+function canvasType(id){ return id==='dashChart' ? 'cumulative' : document.getElementById('gType').value; }
+
+function setupHover(id,tooltipId){
+  const c=document.getElementById(id), tip=document.getElementById(tooltipId);
+  if(!c||!tip) return;
+  c.addEventListener('mousemove',e=>{
+    const info=chartHover[id];
+    if(!info||!info.points.length) return;
+    const rect=c.getBoundingClientRect();
+    const mx=e.clientX-rect.left;
+    let nearest=info.points[0], bestDist=Math.abs(nearest.x-mx);
+    for(const p of info.points){ const d=Math.abs(p.x-mx); if(d<bestDist){bestDist=d;nearest=p;} }
+    const type=info.type||canvasType(id);
+    const sessions=id==='dashChart'?db.sessions.filter(s=>s.status==='completed'):filteredCompletedSessions();
+    drawCanvas(id,type,sessions);
+    const fresh=chartHover[id];
+    if(!fresh||!fresh.pad) return;
+    const ctx=c.getContext('2d'); const dpr=window.devicePixelRatio||1;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.save();
+    ctx.strokeStyle='rgba(51,0,119,.35)'; ctx.setLineDash([3,4]);
+    ctx.beginPath(); ctx.moveTo(nearest.x,fresh.pad.t); ctx.lineTo(nearest.x,fresh.h-fresh.pad.b); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#fffdf7'; ctx.strokeStyle=nearest.value>=0?'#a97f24':'#330077'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(nearest.x,nearest.y,5.5,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.restore();
+    const valTxt=type==='bb'?fmtBB(nearest.value)+' bb':(type==='hourly'?money(nearest.value)+'/hr':money(nearest.value));
+    tip.innerHTML=`<span class="tt-label">${esc(nearest.label)}</span><span class="tt-value" style="color:${nearest.value>=0?'#e3bb5a':'#8a5cff'}">${valTxt}</span>`;
+    tip.style.left=nearest.x+'px'; tip.style.top=Math.max(nearest.y-14,10)+'px'; tip.classList.add('show');
+  });
+  c.addEventListener('mouseleave',()=>{
+    tip.classList.remove('show');
+    const type=canvasType(id);
+    const sessions=id==='dashChart'?db.sessions.filter(s=>s.status==='completed'):filteredCompletedSessions();
+    drawCanvas(id,type,sessions);
+  });
+}
+
+/* ---------- start live session ---------- */
+function openStartLive(){
+  document.getElementById('slVenue').value='';
+  document.getElementById('slStakes').value='';
+  document.getElementById('slSeats').value='';
+  document.getElementById('slBuyin').value='';
+  document.getElementById('slStart').value=toLocalInput(new Date());
+  refreshDatalists();
+  showTab('startLive');
+}
+
+function startLive(){
+  const venue=document.getElementById('slVenue').value.trim();
+  const stakes=document.getElementById('slStakes').value.trim();
+  const seats=document.getElementById('slSeats').value;
+  const buyin=Number(document.getElementById('slBuyin').value)||0;
+  const startTime=fromLocalInput(document.getElementById('slStart').value);
+  if(!venue||!stakes||buyin<=0){ alert('Add a venue, stakes, and an initial buy-in above zero.'); return; }
+  const s={
+    id:uid(), venue, stakes, seats: seats?Number(seats):null,
+    startTime, endTime:null, cashout:null, status:'active', notes:'',
+    buyins:[{id:uid(),amount:buyin,time:startTime,note:'Initial buy-in'}]
+  };
+  db.sessions.push(s);
+  persist();
+  openManageLive();
+}
+
+/* ---------- manage live session ---------- */
+function openManageLive(){
+  const live=activeSession();
+  if(!live){ showTab('dashboard'); return; }
+  refreshDatalists();
+  renderManageLive();
+  showTab('manageLive');
+}
+
+function renderManageLive(){
+  const live=activeSession();
+  if(!live) return;
+  document.getElementById('mlTitle').textContent=live.venue||'Live session';
+  document.getElementById('mlMeta').textContent=(live.stakes||'')+(live.seats?' \u00b7 '+live.seats+'-max':'');
+  document.getElementById('mlVenue').value=live.venue||'';
+  document.getElementById('mlStakes').value=live.stakes||'';
+  document.getElementById('mlSeats').value=live.seats||'';
+  document.getElementById('mlStart').value=toLocalInput(new Date(live.startTime));
+  document.getElementById('mlCashTime').value=toLocalInput(new Date());
+  document.getElementById('mlSub').textContent='running since '+new Date(live.startTime).toLocaleString();
+  document.getElementById('mlBuyins').innerHTML=(live.buyins||[]).map((b,i)=>`
+    <div class="entry-row">
+      <span>${money(b.amount)} ${b.note?'&mdash; '+esc(b.note):''} <span class="muted" style="font-size:12px">(${new Date(b.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})})</span></span>
+      <button type="button" class="ghost onpaper" data-action="remove-topoff" data-index="${i}">Remove</button>
+    </div>`).join('') || '<p class="empty-hint">No buy-ins yet.</p>';
+  document.getElementById('mlTotalBuyin').textContent=money(totalBuyIn(live));
+  document.getElementById('mlTopAmt').value='';
+  document.getElementById('mlTopNote').value='';
+}
+
+function updateLiveField(field,value){
+  const live=activeSession();
+  if(!live) return;
+  live[field]=value;
+  persist();
+}
+
+function addTopoff(){
+  const live=activeSession();
+  if(!live) return;
+  const amt=Number(document.getElementById('mlTopAmt').value);
+  if(!amt || amt<=0){ alert('Enter a top off amount above zero.'); return; }
+  const note=document.getElementById('mlTopNote').value.trim()||'Top off';
+  live.buyins.push({id:uid(),amount:amt,time:new Date().toISOString(),note});
+  persist();
+  renderManageLive();
+}
+
+function removeTopoff(index){
+  const live=activeSession();
+  if(!live) return;
+  live.buyins.splice(index,1);
+  persist();
+  renderManageLive();
+}
+
+function confirmCashout(){
+  const live=activeSession();
+  if(!live) return;
+  const amt=document.getElementById('mlCashAmt').value;
+  if(amt===''||isNaN(Number(amt))){ alert('Enter the cash-out amount.'); return; }
+  const endTime=fromLocalInput(document.getElementById('mlCashTime').value);
+  if(new Date(endTime) < new Date(live.startTime)){ alert('End time is before the start time.'); return; }
+  live.cashout=Number(amt);
+  live.endTime=endTime;
+  live.status='completed';
+  persist();
+  showTab('dashboard');
+}
+
+function discardSession(){
+  const live=activeSession();
+  if(!live) return;
+  if(!confirm('Discard this live session? This cannot be undone.')) return;
+  db.sessions=db.sessions.filter(s=>s.id!==live.id);
+  persist();
+  showTab('dashboard');
+}
+
+/* ---------- completed session add/edit ---------- */
+function blankCompleted(){
+  const now=new Date();
+  return {id:uid(),venue:'',stakes:'',seats:null,startTime:now.toISOString(),endTime:now.toISOString(),cashout:0,status:'completed',notes:'',buyins:[]};
+}
+
+function openCompletedNew(){
+  editing=blankCompleted();
+  document.getElementById('cfTitle').textContent='Add completed session';
+  document.getElementById('cfDelete').classList.add('hidden');
+  refreshDatalists();
+  renderCompletedForm();
+  showTab('completedForm');
+}
+
+function openCompletedEdit(id){
+  const s=db.sessions.find(x=>x.id===id);
+  if(!s) return;
+  editing=JSON.parse(JSON.stringify(s));
+  document.getElementById('cfTitle').textContent='Edit session';
+  document.getElementById('cfDelete').classList.remove('hidden');
+  refreshDatalists();
+  renderCompletedForm();
+  showTab('completedForm');
+}
+
+function renderCompletedForm(){
+  if(!editing) return;
+  document.getElementById('cfVenue').value=editing.venue||'';
+  document.getElementById('cfStakes').value=editing.stakes||'';
+  document.getElementById('cfSeats').value=editing.seats||'';
+  document.getElementById('cfCash').value=editing.cashout==null?'':editing.cashout;
+  document.getElementById('cfStart').value=toLocalInput(new Date(editing.startTime));
+  document.getElementById('cfEnd').value=toLocalInput(new Date(editing.endTime||editing.startTime));
+  document.getElementById('cfNotes').value=editing.notes||'';
+  document.getElementById('cfBuyins').innerHTML=(editing.buyins||[]).map((b,i)=>`
+    <div class="entry-row">
+      <span>${money(b.amount)} ${b.note?'&mdash; '+esc(b.note):''}</span>
+      <button type="button" class="ghost onpaper" data-action="remove-buyin-completed" data-index="${i}">Remove</button>
+    </div>`).join('') || '<p class="empty-hint">No buy-in entries yet &mdash; add at least one below.</p>';
+  updateCompletedNet();
+}
+
+function updateCompletedNet(){
+  if(!editing) return;
+  const cash=Number(document.getElementById('cfCash').value)||0;
+  const buy=totalBuyIn(editing);
+  const net=cash-buy;
+  const el=document.getElementById('cfNet');
+  el.textContent=money(net);
+  el.className='figure num '+(net>=0?'up':'down');
+}
+
+function addBuyinCompleted(){
+  if(!editing) return;
+  const amt=Number(document.getElementById('cfBuyAmt').value);
+  if(!amt||amt<=0){ alert('Enter a buy-in amount above zero.'); return; }
+  const note=document.getElementById('cfBuyNote').value.trim();
+  editing.buyins.push({id:uid(),amount:amt,time:editing.startTime,note});
+  document.getElementById('cfBuyAmt').value='';
+  document.getElementById('cfBuyNote').value='';
+  renderCompletedForm();
+}
+
+function removeBuyinCompleted(index){
+  if(!editing) return;
+  editing.buyins.splice(index,1);
+  renderCompletedForm();
+}
+
+function saveCompleted(){
+  if(!editing) return;
+  editing.venue=document.getElementById('cfVenue').value.trim();
+  editing.stakes=document.getElementById('cfStakes').value.trim();
+  const seats=document.getElementById('cfSeats').value;
+  editing.seats=seats?Number(seats):null;
+  editing.cashout=Number(document.getElementById('cfCash').value)||0;
+  editing.startTime=fromLocalInput(document.getElementById('cfStart').value);
+  editing.endTime=fromLocalInput(document.getElementById('cfEnd').value);
+  editing.notes=document.getElementById('cfNotes').value.trim();
+  editing.status='completed';
+  if(!editing.venue||!editing.stakes){ alert('Add a venue and stakes.'); return; }
+  if(!editing.buyins.length){ alert('Add at least one buy-in entry.'); return; }
+  if(new Date(editing.endTime) < new Date(editing.startTime)){ alert('End time is before the start time.'); return; }
+  const idx=db.sessions.findIndex(s=>s.id===editing.id);
+  if(idx>=0) db.sessions[idx]=editing; else db.sessions.push(editing);
+  persist();
+  editing=null;
+  showTab('sessions');
+}
+
+function deleteCurrent(){
+  if(!editing) return;
+  if(!confirm('Delete this session? This cannot be undone.')) return;
+  db.sessions=db.sessions.filter(s=>s.id!==editing.id);
+  persist();
+  editing=null;
+  showTab('sessions');
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',event=>{
+  const tab=event.target.closest('[data-tab]');
+  if(tab){ showTab(tab.dataset.tab,tab); return; }
+
+  const actionEl=event.target.closest('[data-action]');
+  if(actionEl){
+    event.stopPropagation();
+    const action=actionEl.dataset.action;
+    if(action==='live-nav'){ activeSession()?openManageLive():openStartLive(); }
+    else if(action==='open-manage-live') openManageLive();
+    else if(action==='completed-new-open') openCompletedNew();
+    else if(action==='close-editor') closeEditor();
+    else if(action==='start-live') startLive();
+    else if(action==='add-topoff') addTopoff();
+    else if(action==='remove-topoff') removeTopoff(Number(actionEl.dataset.index));
+    else if(action==='confirm-cashout') confirmCashout();
+    else if(action==='discard-session') discardSession();
+    else if(action==='add-buyin-completed') addBuyinCompleted();
+    else if(action==='remove-buyin-completed') removeBuyinCompleted(Number(actionEl.dataset.index));
+    else if(action==='save-completed') saveCompleted();
+    else if(action==='delete-current') deleteCurrent();
+    return;
+  }
+
+  const openEl=event.target.closest('[data-open-id]');
+  if(openEl) openSession(openEl.dataset.openId);
+});
+
+['mlVenue','mlStakes','mlSeats','mlStart'].forEach(id=>{
+  document.getElementById(id).addEventListener('change',e=>{
+    const map={mlVenue:'venue',mlStakes:'stakes',mlSeats:'seats',mlStart:'startTime'};
+    const field=map[id];
+    let val=e.target.value;
+    if(id==='mlSeats') val=val?Number(val):null;
+    if(id==='mlStart') val=fromLocalInput(val);
+    updateLiveField(field,val);
+  });
+});
+document.getElementById('mlTopAmt').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); addTopoff(); } });
+
+['cfCash','cfBuyAmt'].forEach(id=>document.getElementById(id).addEventListener('input',updateCompletedNet));
+document.getElementById('cfBuyNote').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); addBuyinCompleted(); } });
+
+['gType','gVenue','gStakes'].forEach(id=>document.getElementById(id).addEventListener('change',drawGraph));
+
+window.addEventListener('resize',()=>{
+  if(!document.getElementById('dashboard').classList.contains('hidden')) drawCanvas('dashChart','cumulative',db.sessions.filter(s=>s.status==='completed'));
+  if(!document.getElementById('graphs').classList.contains('hidden')) drawGraph();
+});
+
+showTab('dashboard');
+setupHover('dashChart','dashTooltip');
+setupHover('mainChart','mainTooltip');
+if(!storageOK){ const n=document.getElementById('browserNotice'); if(n) n.style.display='block'; }
+</script>
+</body></html>
